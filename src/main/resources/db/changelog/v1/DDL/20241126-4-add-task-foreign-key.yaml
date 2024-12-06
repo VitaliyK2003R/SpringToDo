@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: add task foreign key
+      author: Komissarov Vitaliy
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: task
+            baseColumnNames: account_id
+            referencedTableName: account
+            referencedColumnNames: id
+            constraintName: fk_task_account
+            onUpdate: CASCADE

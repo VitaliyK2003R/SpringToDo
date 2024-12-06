@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: DDL/20241126-1-add-uuid-extension.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: DDL/20241126-2-create-task-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: DDL/20241126-3-create-account-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: DDL/20241126-4-add-task-foreign-key.yaml
+      relativeToChangelogFile: true

@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 'add uuid extension'
+      author: 'Komissarov Vitaliy'
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            endDelimiter: ';'
+            splitStatements: true
+            path: sql/20241126-1-add-uuid-extension.sql
+            relativeToChangelogFile: true
