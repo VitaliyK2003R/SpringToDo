@@ -156,8 +156,9 @@ public class AccountServiceTest {
     public void successCreatingTask() {
         UUID accountId = UUID.randomUUID();
         TaskRequest taskRequest = TaskRequest.builder().build();
+        TaskResponse taskResponse = TaskResponse.builder().build();
 
-        doNothing().when(taskService.create(accountId, taskRequest));
+        when(taskService.create(accountId, taskRequest)).thenReturn(taskResponse);
 
         assertDoesNotThrow(() -> accountService.createTask(accountId, taskRequest));
     }

@@ -53,7 +53,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "201", description = "информация об аккаунте получена"),
             @ApiResponse(responseCode = "400", description = "ошибка валидации")
     })
-    ResponseEntity<AccountResponse> get(@Parameter(description ="Идентификатор аккаунта") @PathVariable UUID accountId);
+    ResponseEntity<AccountResponse> get(@Parameter(description ="Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId);
 
     @GetMapping
     @Operation(summary = "Получение всех данных о всех аккаунтах")
@@ -71,7 +71,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "400", description = "ошибка валидации")
     })
     void update(
-            @Parameter(description = "Идентификатор аккаунта") @PathVariable UUID accountId,
+            @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
             @Parameter(description =    "Входные данные при обновлении аккаунта")
             @RequestBody @Valid AccountRequest accountRequest);
 
@@ -82,7 +82,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "201", description = "аккаунт удален"),
             @ApiResponse(responseCode = "400", description = "ошибка валидации")
     })
-    void delete(@Parameter(description = "Идентификатор аккаунта") @PathVariable UUID accountId);
+    void delete(@Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId);
 
     @PostMapping("/{accountId}/tasks")
     @Operation(summary = "Создание задачи")
@@ -93,7 +93,7 @@ public interface AccountApi {
     })
     ResponseEntity<TaskResponse> createTask(
             @Parameter(description = "Идентификатор аккаунта")
-            @PathVariable UUID accountId, @RequestBody @Valid TaskRequest taskRequest);
+            @PathVariable(name = "accountId") UUID accountId, @RequestBody @Valid TaskRequest taskRequest);
 
     @GetMapping("/{accountId}/tasks/{taskId}")
     @Operation(summary = "Получение задачи")
@@ -104,7 +104,7 @@ public interface AccountApi {
     })
     ResponseEntity<TaskResponse> getTask(
             @Parameter(description = "Идентификатор аккаунта")
-            @PathVariable UUID accountId,
+            @PathVariable(name = "accountId") UUID accountId,
             @Parameter(description = "Идентификатор задачи")
             @PathVariable UUID taskId);
 
@@ -115,7 +115,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "201", description = "информация о задачах получена"),
     })
     ResponseEntity<List<TaskResponse>> getAllTasks(
-            @Parameter(description = "Идентификатор аккаунта") @PathVariable UUID accountId,
+            @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
             @Parameter(description = "Номер страницы, начиная с 0")
             @RequestParam(required = false, defaultValue = "0") @Min(0) @Max(50) int page,
             @Parameter(description = "Количество записей на одной странице")
@@ -129,8 +129,8 @@ public interface AccountApi {
             @ApiResponse(responseCode = "400", description = "ошибка валидации")
     })
     void updateTask(
-            @Parameter(description = "Идентификатор аккаунта") @PathVariable UUID accountId,
-            @Parameter(description = "Идентификатор задачи") @PathVariable UUID taskId,
+            @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
+            @Parameter(description = "Идентификатор задачи") @PathVariable(name = "taskId") UUID taskId,
             @Parameter(description = "Входные данные при обновлении задачи")
             @RequestBody @Valid UpdateTaskRequest taskRequest);
 
@@ -142,6 +142,6 @@ public interface AccountApi {
             @ApiResponse(responseCode = "400", description = "ошибка валидации")
     })
     void deleteTask(
-            @Parameter(description = "Идентификатор аккаунта") @PathVariable UUID accountId,
-            @Parameter(description = "Идентификатор задачи") @PathVariable UUID taskId);
+            @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
+            @Parameter(description = "Идентификатор задачи") @PathVariable(name = "taskId") UUID taskId);
 }

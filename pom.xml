@@ -6,7 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.3.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>com.emobile</groupId>
     <artifactId>SpringToDo</artifactId>
@@ -50,12 +50,6 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.hibernate</groupId>-->
-<!--            <artifactId>hibernate-validator</artifactId>-->
-<!--            <version>6.2.5.Final</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -104,8 +98,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Testcontainers JUnit 5 Extension -->
-        <!-- @Testcontainers and @Container to star and stop container -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -136,6 +128,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                     <source>21</source>
                     <target>21</target>
                     <annotationProcessorPaths>
