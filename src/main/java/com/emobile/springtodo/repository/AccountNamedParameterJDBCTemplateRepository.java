@@ -22,16 +22,18 @@ import java.util.UUID;
 @Repository
 @RequiredArgsConstructor
 public class AccountNamedParameterJDBCTemplateRepository implements AccountRepository {
+    private static final String QUERY_ACCOUNT_NAME_PARAMETER_NAME = "username";
+    private static final String QUERY_ACCOUNT_ID_PARAMETER_NAME = "accountId";
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private static final RowMapper<Account> ROW_MAPPER = (resultSet, rowNum) -> Account.builder()
-                                                                        .id((UUID) resultSet.getObject("id"))
-                                                                        .username(resultSet.getString("username"))
-                                                                        .build();
+            .id((UUID) resultSet.getObject("id"))
+            .username(resultSet.getString(QUERY_ACCOUNT_NAME_PARAMETER_NAME))
+            .build();
 
     @Override
     public Account create(Account account) {
         checkAccountExists(account.getUsername());
-        Map<String, Object> accountParameters = Map.of("username", account.getUsername());
+        Map<String, Object> accountParameters = Map.of(QUERY_ACCOUNT_NAME_PARAMETER_NAME, account.getUsername());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         SqlParameterSource parameterSource = new MapSqlParameterSource(accountParameters);
         int countChanges = namedParameterJdbcTemplate.update(
@@ -57,7 +59,7 @@ public class AccountNamedParameterJDBCTemplateRepository implements AccountRepos
         try {
             namedParameterJdbcTemplate.queryForObject(
                     "select * from account where account.username = :username",
-                    Map.of("username", username),
+                    Map.of(QUERY_ACCOUNT_NAME_PARAMETER_NAME, username),
                     ROW_MAPPER
             );
             return true;
@@ -70,10 +72,10 @@ public class AccountNamedParameterJDBCTemplateRepository implements AccountRepos
     public Account get(UUID accountId) {
         checkAccountExists(accountId);
         return namedParameterJdbcTemplate.queryForObject(
-                                                        "select * from account where account.id = :accountId",
-                                                            Map.of("accountId", accountId),
-                                                            ROW_MAPPER
-                                                        );
+                "select * from account where account.id = :accountId",
+                Map.of(QUERY_ACCOUNT_ID_PARAMETER_NAME, accountId),
+                ROW_MAPPER
+        );
     }
 
     @Override
@@ -85,9 +87,10 @@ public class AccountNamedParameterJDBCTemplateRepository implements AccountRepos
     public void update(UUID accountId, Account accountTask) {
         checkAccountExists(accountId);
         int countChanges = namedParameterJdbcTemplate.update(
-                                    "update account set username = :username where account.id = :accountId",
-                                        Map.of("username", accountTask.getUsername(), "accountId", accountId)
-                                                            );
+                "update account set username = :username where account.id = :accountId",
+                Map.of(QUERY_ACCOUNT_NAME_PARAMETER_NAME, accountTask.getUsername(),
+                        QUERY_ACCOUNT_ID_PARAMETER_NAME, accountId)
+        );
         if (countChanges != 1) {
             throw new SQLProcessChangesException("Invalid result count changes in data base");
         }
@@ -97,7 +100,7 @@ public class AccountNamedParameterJDBCTemplateRepository implements AccountRepos
         try {
             namedParameterJdbcTemplate.queryForObject(
                     "select * from account where account.id = :accountId",
-                    Map.of("accountId", accountId),
+                    Map.of(QUERY_ACCOUNT_ID_PARAMETER_NAME, accountId),
                     ROW_MAPPER);
         } catch (EmptyResultDataAccessException ex) {
             throw new AccountNotFoundException(accountId);
@@ -108,7 +111,8 @@ public class AccountNamedParameterJDBCTemplateRepository implements AccountRepos
     public void delete(UUID accountId) {
         checkAccountExists(accountId);
         namedParameterJdbcTemplate.update(
-                            "delete from account where account.id = :accountId", Map.of("accountId", accountId)
-                                        );
+                "delete from account where account.id = :accountId",
+                Map.of(QUERY_ACCOUNT_ID_PARAMETER_NAME, accountId)
+        );
     }
 }

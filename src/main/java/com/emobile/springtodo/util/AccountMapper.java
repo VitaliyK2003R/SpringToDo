@@ -3,7 +3,6 @@ package com.emobile.springtodo.util;
 import com.emobile.springtodo.dto.request.AccountRequest;
 import com.emobile.springtodo.dto.response.AccountResponse;
 import com.emobile.springtodo.dto.response.AccountTaskResponse;
-import com.emobile.springtodo.dto.response.TaskResponse;
 import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
 import org.mapstruct.Mapper;

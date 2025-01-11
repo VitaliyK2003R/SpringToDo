@@ -10,8 +10,8 @@ import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.GenericContainer;
@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @Transactional
 @AutoConfigureCache
+@ActiveProfiles("test")
 public class AccountControllerIntegrationTest {
     @Autowired
     private AccountService accountService;
@@ -42,9 +43,10 @@ public class AccountControllerIntegrationTest {
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12-alpine");
-//    @Container
-//    @ServiceConnection(name = "redis")
-//    static GenericContainer<?> redisContainer = new GenericContainer<>(DockerImageName.parse("redis:6.2-alpine")).withExposedPorts(6379);
+    @Container
+    @ServiceConnection(name = "redis")
+    static GenericContainer<?> redisContainer
+            = new GenericContainer<>(DockerImageName.parse("redis:6.2-alpine")).withExposedPorts(6379);
 
     @Test
     public void successCreatingAccountTest() throws Exception {
@@ -85,8 +87,8 @@ public class AccountControllerIntegrationTest {
         AccountRequest accountRequest = AccountRequest.builder().username("updatedAccount").build();
 
         mockMvc.perform(put("/api/v1/accounts/{accountId}", accountId)
-                                    .content(objectMapper.writeValueAsString(accountRequest))
-                                    .contentType(MediaType.APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(accountRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
 
         mockMvc.perform(get("/api/v1/accounts/{accountId}", accountId))

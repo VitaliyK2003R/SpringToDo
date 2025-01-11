@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTest {
     @InjectMocks
@@ -44,10 +45,10 @@ public class AccountServiceTest {
         AccountRequest creatableRequest = new AccountRequest("username");
         Account creatableAccount = Account.builder().id(generatedAccountId).username("username").build();
         AccountResponse createdResponse = AccountResponse.builder()
-                                                            .id(generatedAccountId)
-                                                            .username("username")
-                                                            .accountTaskResponses(Collections.emptyList())
-                                                            .build();
+                .id(generatedAccountId)
+                .username("username")
+                .accountTaskResponses(Collections.emptyList())
+                .build();
 
         when(accountMapper.toModel(creatableRequest)).thenReturn(creatableAccount);
         when(accountRepository.create(creatableAccount)).thenReturn(creatableAccount);
@@ -103,19 +104,19 @@ public class AccountServiceTest {
         UUID firstAccountId = UUID.randomUUID();
         UUID secondAccountId = UUID.randomUUID();
         List<Account> accounts = List.of(   Account.builder().id(firstAccountId).build(),
-                                            Account.builder().id(secondAccountId).build());
+                Account.builder().id(secondAccountId).build());
         List<Task> firstAccountTasks = Collections.emptyList();
         List<Task> secondAccountTasks = List.of(Task.builder().build());
         List<AccountResponse> expectedResponses = List.of(
-                                            AccountResponse.builder()
-                                                .id(firstAccountId)
-                                                .accountTaskResponses(Collections.emptyList())
-                                                .build(),
-                                            AccountResponse.builder()
-                                                .id(secondAccountId)
-                                                .accountTaskResponses(List.of(AccountTaskResponse.builder().build()))
-                                                .build()
-                                                        );
+                AccountResponse.builder()
+                        .id(firstAccountId)
+                        .accountTaskResponses(Collections.emptyList())
+                        .build(),
+                AccountResponse.builder()
+                        .id(secondAccountId)
+                        .accountTaskResponses(List.of(AccountTaskResponse.builder().build()))
+                        .build()
+        );
 
         when(accountRepository.getAll()).thenReturn(accounts);
         when(taskService.getAllByAccountId(firstAccountId)).thenReturn(firstAccountTasks);
@@ -124,10 +125,10 @@ public class AccountServiceTest {
 
         assertDoesNotThrow(() -> accountService.getAll());
         List<AccountResponse> responses = accountService.getAll();
-        assertEquals(responses.get(0).id(), firstAccountId);
-        assertEquals(responses.get(1).id(), secondAccountId);
-        assertEquals(responses.get(0).accountTaskResponses().size(), 0);
-        assertEquals(responses.get(1).accountTaskResponses().size(), 1);
+        assertEquals(firstAccountId, responses.get(0).id());
+        assertEquals(secondAccountId, responses.get(1).id());
+        assertEquals(0, responses.get(0).accountTaskResponses().size());
+        assertEquals(1, responses.get(1).accountTaskResponses().size());
     }
 
     @Test

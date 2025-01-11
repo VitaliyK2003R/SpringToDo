@@ -6,18 +6,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Testcontainers
 @Transactional
+@ActiveProfiles("test")
 public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
     @Autowired
     private AccountNamedParameterJDBCTemplateRepository accountNamedParameterJDBCTemplateRepository;
@@ -80,11 +83,13 @@ public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
         Account deletableAccount = createAccount(buildAccount("account"));
 
         accountNamedParameterJDBCTemplateRepository.delete(deletableAccount.getId());
+        UUID deletedAccountId = deletableAccount.getId();
 
+        assertNotNull(deletedAccountId);
         assertThrows(
-                        AccountNotFoundException.class,
-                        () -> accountNamedParameterJDBCTemplateRepository.get(deletableAccount.getId())
-                    );
+                AccountNotFoundException.class,
+                () -> accountNamedParameterJDBCTemplateRepository.get(deletedAccountId)
+        );
     }
 
     private Account createAccount(Account account) {

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
+@ActiveProfiles("test")
 public class AccountControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
@@ -34,9 +36,9 @@ public class AccountControllerTest {
         AccountRequest accountRequest = AccountRequest.builder().username("account").build();
         UUID accountId = getUUID(18);
         AccountResponse expectedAccountResponse = AccountResponse.builder()
-                                                                    .id(accountId)
-                                                                    .username("account")
-                                                                    .build();
+                .id(accountId)
+                .username("account")
+                .build();
 
         when(accountService.create(accountRequest)).thenReturn(expectedAccountResponse);
 
