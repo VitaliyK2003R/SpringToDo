@@ -3,13 +3,19 @@ package com.emobile.springtodo.service;
 import com.emobile.springtodo.dto.request.TaskRequest;
 import com.emobile.springtodo.dto.request.UpdateTaskRequest;
 import com.emobile.springtodo.dto.response.TaskResponse;
+import com.emobile.springtodo.exception.TaskNotFoundException;
+import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
 import com.emobile.springtodo.repository.TaskRepository;
 import com.emobile.springtodo.util.TaskMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,39 +26,56 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse create(UUID accountId, TaskRequest taskRequest) {
-        Task task = taskMapper.toModel(taskRequest);
-        task.setAccountId(accountId);
-        task = taskRepository.create(task);
-        return taskMapper.toResponse(task);
+        Task creatableTask = taskMapper.toModel(taskRequest);
+        Account account = Account.builder().id(accountId).build();
+        creatableTask.setAccount(account);
+        creatableTask = taskRepository.save(creatableTask);
+        return taskMapper.toResponse(creatableTask);
     }
 
     @Override
     public TaskResponse get(UUID taskId) {
-        return taskMapper.toResponse(taskRepository.get(taskId));
+        return taskMapper.toResponse(taskRepository.findById(taskId).orElseThrow(TaskNotFoundException::new));
     }
 
     @Override
-    public List<TaskResponse> getAllPaged(UUID accountId, int page, int size) {
-        return taskMapper.toListResponses(taskRepository.getAllPagedByAccountId(accountId, page, size));
+    public Page<TaskResponse> getAllPaged(UUID accountId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return taskMapper.toPagedResponses(taskRepository.findAllByAccount_Id(accountId, pageable));
     }
 
     @Override
     public void update(UUID taskId, UpdateTaskRequest updateTaskRequest) {
-        taskRepository.update(taskId, taskMapper.toModel(updateTaskRequest));
+        Task updatedTask = taskMapper.toModel(updateTaskRequest);
+        Task updatableTask = getTask(taskId);
+        updatableTask.setAccount(updatedTask.getAccount());
+        updatableTask.setName(updatedTask.getName());
+        updatableTask.setTitle(updatedTask.getTitle());
+        updatableTask.setStart(updatedTask.getStart());
+        updatableTask.setFinish(updatedTask.getFinish());
+        taskRepository.save(updatableTask);
     }
 
     @Override
     public void delete(UUID taskId) {
-        taskRepository.delete(taskId);
+        taskRepository.deleteById(taskId);
     }
 
     @Override
-    public List<Task> getAllByAccountId(UUID accountId) {
-        return taskRepository.getAllPagedByAccountId(accountId, 0, 5);
+    public List<Task> getAll(UUID accountId) {
+        return taskRepository.findAllByAccount_Id(accountId);
     }
 
     @Override
     public void deleteAllByAccountId(UUID accountId) {
         taskRepository.deleteAllByAccountId(accountId);
+    }
+
+    private Task getTask(UUID taskId) {
+        Optional<Task> optionalTask = taskRepository.findById(taskId);
+        if (optionalTask.isEmpty()) {
+            throw new TaskNotFoundException();
+        }
+        return optionalTask.get();
     }
 }

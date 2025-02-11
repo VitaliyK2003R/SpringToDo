@@ -1,29 +1,29 @@
 package com.emobile.springtodo.repository;
 
-import com.emobile.springtodo.exception.AccountNotFoundException;
 import com.emobile.springtodo.model.Account;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@DataJpaTest
 @Testcontainers
-@Transactional
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
+public class AccountRepositoryIntegrationTest {
     @Autowired
-    private AccountNamedParameterJDBCTemplateRepository accountNamedParameterJDBCTemplateRepository;
+    private AccountRepository accountRepository;
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12-alpine");
@@ -32,7 +32,7 @@ public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
     public void successCreatingAccountTest() {
         Account expectedAccount = buildAccount("account");
 
-        Account actualAccount = accountNamedParameterJDBCTemplateRepository.create(expectedAccount);
+        Account actualAccount = accountRepository.save(expectedAccount);
 
         assertNotNull(actualAccount);
         assertNotNull(actualAccount.getId());
@@ -45,7 +45,7 @@ public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
         Account expectedAccount = buildAccount("account");
         expectedAccount = createAccount(expectedAccount);
 
-        Account actualAccount = accountNamedParameterJDBCTemplateRepository.get(expectedAccount.getId());
+        Account actualAccount = accountRepository.findById(expectedAccount.getId()).orElseThrow();
 
         assertNotNull(actualAccount);
         assertNotNull(actualAccount.getId());
@@ -58,7 +58,7 @@ public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
         Account firstAccount = createAccount(buildAccount("firstAccount"));
         Account secondAccount = createAccount(buildAccount("secondAccount"));
 
-        List<Account> actualAccounts = accountNamedParameterJDBCTemplateRepository.getAll();
+        List<Account> actualAccounts = accountRepository.findAll();
 
         assertNotNull(actualAccounts);
         assertFalse(actualAccounts.isEmpty());
@@ -70,9 +70,11 @@ public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
         Account expectedAccount = createAccount(buildAccount("account"));
 
         expectedAccount.setUsername("updatedUsername");
-        accountNamedParameterJDBCTemplateRepository.update(expectedAccount.getId(), expectedAccount);
+        accountRepository.save(expectedAccount);
 
-        Account actualAccount = accountNamedParameterJDBCTemplateRepository.get(expectedAccount.getId());
+        Optional<Account> optionalActualAccount = accountRepository.findById(expectedAccount.getId());
+        assertTrue(optionalActualAccount.isPresent());
+        Account actualAccount = optionalActualAccount.get();
         assertNotNull(actualAccount);
         assertEquals(expectedAccount.getId(), actualAccount.getId());
         assertEquals("updatedUsername", actualAccount.getUsername());
@@ -82,18 +84,15 @@ public class AccountNamedParameterJDBCTemplateRepositoryIntegrationTest {
     public void successDeletingAccountTest() {
         Account deletableAccount = createAccount(buildAccount("account"));
 
-        accountNamedParameterJDBCTemplateRepository.delete(deletableAccount.getId());
+        accountRepository.deleteById(deletableAccount.getId());
         UUID deletedAccountId = deletableAccount.getId();
 
         assertNotNull(deletedAccountId);
-        assertThrows(
-                AccountNotFoundException.class,
-                () -> accountNamedParameterJDBCTemplateRepository.get(deletedAccountId)
-        );
+        assertFalse(accountRepository.findById(deletedAccountId).isPresent());
     }
 
     private Account createAccount(Account account) {
-        return accountNamedParameterJDBCTemplateRepository.create(account);
+        return accountRepository.saveAndFlush(account);
     }
 
     private Account buildAccount(String username) {

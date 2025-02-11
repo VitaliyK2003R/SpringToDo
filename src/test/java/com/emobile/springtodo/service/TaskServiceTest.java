@@ -3,6 +3,7 @@ package com.emobile.springtodo.service;
 import com.emobile.springtodo.dto.request.TaskRequest;
 import com.emobile.springtodo.dto.request.UpdateTaskRequest;
 import com.emobile.springtodo.dto.response.TaskResponse;
+import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
 import com.emobile.springtodo.repository.TaskRepository;
 import com.emobile.springtodo.util.TaskMapper;
@@ -11,10 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -40,7 +46,7 @@ public class TaskServiceTest {
         TaskResponse taskResponse = TaskResponse.builder().accountId(accountId).name("name").build();
 
         when(taskMapper.toModel(taskRequest)).thenReturn(mappedRequest);
-        when(taskRepository.create(mappedRequest)).thenReturn(mappedRequest);
+        when(taskRepository.save(mappedRequest)).thenReturn(mappedRequest);
         when(taskMapper.toResponse(mappedRequest)).thenReturn(taskResponse);
 
         assertDoesNotThrow(() -> taskService.create(accountId, taskRequest));
@@ -54,7 +60,7 @@ public class TaskServiceTest {
         Task task = Task.builder().id(taskId).build();
         TaskResponse taskResponse = TaskResponse.builder().id(taskId).build();
 
-        when(taskRepository.get(taskId)).thenReturn(task);
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
         when(taskMapper.toResponse(task)).thenReturn(taskResponse);
 
         assertDoesNotThrow(() -> taskService.get(taskId));
@@ -66,12 +72,15 @@ public class TaskServiceTest {
         UUID accountId = UUID.randomUUID();
         List<Task> tasks = Collections.emptyList();
         List<TaskResponse> taskResponses = Collections.emptyList();
+        Pageable pageable = PageRequest.of(0,5);
+        Page<Task> pagedTasks = new PageImpl<>(tasks, pageable, 0);
+        Page<TaskResponse> pagedTaskResponses = new PageImpl<>(taskResponses, pageable, 0);
 
-        when(taskService.getAllByAccountId(accountId)).thenReturn(tasks);
-        when(taskMapper.toListResponses(tasks)).thenReturn(taskResponses);
+        when(taskRepository.findAllByAccount_Id(accountId, pageable)).thenReturn(pagedTasks);
+        when(taskMapper.toPagedResponses(pagedTasks)).thenReturn(pagedTaskResponses);
 
         assertDoesNotThrow(() -> taskService.getAllPaged(accountId, 0, 5));
-        assertEquals(0, taskService.getAllPaged(accountId,0,5).size());
+        assertEquals(0, taskService.getAllPaged(accountId,0,5).getTotalElements());
     }
 
     @Test
@@ -81,7 +90,8 @@ public class TaskServiceTest {
         Task task = Task.builder().build();
 
         when(taskMapper.toModel(updateTaskRequest)).thenReturn(task);
-        doNothing().when(taskRepository).update(taskId, task);
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        when(taskRepository.save(task)).thenReturn(task);
 
         assertDoesNotThrow(() -> taskService.update(taskId, updateTaskRequest));
     }
@@ -90,7 +100,7 @@ public class TaskServiceTest {
     public void successDeletingTaskTest() {
         UUID taskId = UUID.randomUUID();
 
-        doNothing().when(taskRepository).delete(taskId);
+        doNothing().when(taskRepository).deleteById(taskId);
 
         assertDoesNotThrow(() -> taskService.delete(taskId));
     }
@@ -98,13 +108,14 @@ public class TaskServiceTest {
     @Test
     public void successGettingAllByAccountIdTest() {
         UUID accountId = UUID.randomUUID();
+        Account account = Account.builder().id(accountId).build();
         UUID taskId = UUID.randomUUID();
-        List<Task> tasks = List.of(Task.builder().id(taskId).accountId(accountId).build());
+        List<Task> tasks = List.of(Task.builder().id(taskId).account(account).build());
 
-        when(taskRepository.getAllPagedByAccountId(accountId, 0, 5)).thenReturn(tasks);
+        when(taskRepository.findAllByAccount_Id(accountId)).thenReturn(tasks);
 
-        assertDoesNotThrow(() -> taskService.getAllByAccountId(accountId));
-        List<Task> responses = taskService.getAllByAccountId(accountId);
+        assertDoesNotThrow(() -> taskService.getAll(accountId));
+        List<Task> responses = taskService.getAll(accountId);
         assertEquals(1, responses.size());
         assertEquals(taskId, responses.get(0).getId());
     }

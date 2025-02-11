@@ -17,10 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,7 +55,7 @@ public class AccountServiceTest {
                 .build();
 
         when(accountMapper.toModel(creatableRequest)).thenReturn(creatableAccount);
-        when(accountRepository.create(creatableAccount)).thenReturn(creatableAccount);
+        when(accountRepository.save(creatableAccount)).thenReturn(creatableAccount);
         when(accountMapper.toResponse(creatableAccount)).thenReturn(createdResponse);
 
         assertDoesNotThrow(() -> accountService.create(creatableRequest));
@@ -64,7 +68,7 @@ public class AccountServiceTest {
         Account creatableAccount = Account.builder().username("username").build();
 
         when(accountMapper.toModel(creatableRequest)).thenReturn(creatableAccount);
-        when(accountRepository.create(creatableAccount)).thenThrow(AccountAlreadyExistsException.class);
+        when(accountRepository.save(creatableAccount)).thenThrow(AccountAlreadyExistsException.class);
 
         assertThrows(AccountAlreadyExistsException.class, () -> accountService.create(creatableRequest));
     }
@@ -80,8 +84,8 @@ public class AccountServiceTest {
                 .accountTaskResponses(List.of(AccountTaskResponse.builder().id(taskId).build()))
                 .build();
 
-        when(accountRepository.get(accountId)).thenReturn(account);
-        when(taskService.getAllByAccountId(accountId)).thenReturn(tasks);
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(taskService.getAll(accountId)).thenReturn(tasks);
         when(accountMapper.toResponse(account)).thenReturn(expectedResponse);
 
         assertDoesNotThrow(() -> accountService.get(accountId));
@@ -94,9 +98,9 @@ public class AccountServiceTest {
     public void failGettingAccountTest() {
         UUID accountId = UUID.randomUUID();
 
-        when(accountRepository.get(accountId)).thenThrow(AccountNotFoundException.class);
+        when(accountRepository.findById(accountId)).thenThrow(AccountNotFoundException.class);
 
-        assertThrows(AccountNotFoundException.class, () -> accountRepository.get(accountId));
+        assertThrows(AccountNotFoundException.class, () -> accountRepository.findById(accountId));
     }
 
     @Test
@@ -118,9 +122,9 @@ public class AccountServiceTest {
                         .build()
         );
 
-        when(accountRepository.getAll()).thenReturn(accounts);
-        when(taskService.getAllByAccountId(firstAccountId)).thenReturn(firstAccountTasks);
-        when(taskService.getAllByAccountId(secondAccountId)).thenReturn(secondAccountTasks);
+        when(accountRepository.findAll()).thenReturn(accounts);
+        when(taskService.getAll(firstAccountId)).thenReturn(firstAccountTasks);
+        when(taskService.getAll(secondAccountId)).thenReturn(secondAccountTasks);
         when(accountMapper.toListResponses(accounts)).thenReturn(expectedResponses);
 
         assertDoesNotThrow(() -> accountService.getAll());
@@ -138,7 +142,8 @@ public class AccountServiceTest {
         Account mappedUpdateRequest = Account.builder().username("user").build();
 
         when(accountMapper.toModel(updateRequest)).thenReturn(mappedUpdateRequest);
-        doNothing().when(accountRepository).update(accountId, mappedUpdateRequest);
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(mappedUpdateRequest));
+        when(accountRepository.save(mappedUpdateRequest)).thenReturn(mappedUpdateRequest);
 
         assertDoesNotThrow(() -> accountService.update(accountId, updateRequest));
     }
@@ -147,8 +152,7 @@ public class AccountServiceTest {
     public void successDeletingTest() {
         UUID accountId = UUID.randomUUID();
 
-        doNothing().when(accountRepository).delete(accountId);
-        doNothing().when(taskService).deleteAllByAccountId(accountId);
+        doNothing().when(accountRepository).deleteById(accountId);
 
         assertDoesNotThrow(() -> accountService.delete(accountId));
     }
@@ -183,15 +187,16 @@ public class AccountServiceTest {
         UUID secondTaskId = UUID.randomUUID();
         TaskResponse firstTaskResponse = TaskResponse.builder().id(firstTaskId).build();
         TaskResponse secondTaskResponse = TaskResponse.builder().id(secondTaskId).build();
-        List<TaskResponse> expectedTaskResponses = List.of(firstTaskResponse, secondTaskResponse);
+        List<TaskResponse> expectedListTaskResponses = List.of(firstTaskResponse, secondTaskResponse);
+        Page<TaskResponse> expectedPagedTaskResponses = new PageImpl<>(expectedListTaskResponses, PageRequest.of(0, 5), 2);
 
-        when(taskService.getAllPaged(accountId,0,5)).thenReturn(expectedTaskResponses);
+        when(taskService.getAllPaged(accountId,0,5)).thenReturn(expectedPagedTaskResponses);
 
         assertDoesNotThrow(() -> accountService.getAllTasks(accountId,0,5));
-        List<TaskResponse> responses = accountService.getAllTasks(accountId,0,5);
-        assertEquals(expectedTaskResponses.size(), responses.size());
-        assertEquals(expectedTaskResponses.get(0).id(), responses.get(0).id());
-        assertEquals(expectedTaskResponses.get(1).id(), responses.get(1).id());
+        Page<TaskResponse> responses = accountService.getAllTasks(accountId,0,5);
+        assertEquals(expectedPagedTaskResponses.getTotalElements(), responses.getTotalElements());
+        assertEquals(expectedPagedTaskResponses.getContent().get(0).id(), responses.getContent().get(0).id());
+        assertEquals(expectedPagedTaskResponses.getContent().get(1).id(), responses.getContent().get(1).id());
     }
 
     @Test

@@ -15,9 +15,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,7 +54,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "201", description = "информация об аккаунте получена"),
             @ApiResponse(responseCode = "400", description = "ошибка валидации")
     })
-    ResponseEntity<AccountResponse> get(@Parameter(description ="Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId);
+    ResponseEntity<AccountResponse> get(@Parameter(description ="Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId) throws AccountNotFoundException;
 
     @GetMapping
     @Operation(summary = "Получение всех данных о всех аккаунтах")
@@ -72,7 +74,7 @@ public interface AccountApi {
     void update(
             @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
             @Parameter(description =    "Входные данные при обновлении аккаунта")
-            @RequestBody @Valid AccountRequest accountRequest);
+            @RequestBody @Valid AccountRequest accountRequest) throws AccountNotFoundException;
 
     @DeleteMapping("/{accountId}")
     @Operation(summary = "Удаление аккаунта")
@@ -113,7 +115,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "200", description = "информация о задачах получена"),
             @ApiResponse(responseCode = "201", description = "информация о задачах получена"),
     })
-    ResponseEntity<List<TaskResponse>> getAllTasks(
+    ResponseEntity<Page<TaskResponse>> getAllTasks(
             @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
             @Parameter(description = "Номер страницы, начиная с 0")
             @RequestParam(required = false, defaultValue = "0") @Min(0) @Max(50) int page,

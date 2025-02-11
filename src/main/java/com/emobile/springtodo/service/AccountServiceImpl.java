@@ -5,6 +5,7 @@ import com.emobile.springtodo.dto.request.TaskRequest;
 import com.emobile.springtodo.dto.request.UpdateTaskRequest;
 import com.emobile.springtodo.dto.response.AccountResponse;
 import com.emobile.springtodo.dto.response.TaskResponse;
+import com.emobile.springtodo.exception.AccountNotFoundException;
 import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
 import com.emobile.springtodo.repository.AccountRepository;
@@ -13,10 +14,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,24 +33,24 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse create(AccountRequest accountRequest) {
         Account creatableAccount = accountMapper.toModel(accountRequest);
-        creatableAccount = accountRepository.create(creatableAccount);
+        creatableAccount = accountRepository.save(creatableAccount);
         return accountMapper.toResponse(creatableAccount);
     }
 
     @Cacheable(value = "accounts", key = "#accountId")
     @Override
     public AccountResponse get(UUID accountId) {
-        Account account = accountRepository.get(accountId);
-        List<Task> accountTasks = taskService.getAllByAccountId(accountId);
+        Account account = getAccount(accountId);
+        List<Task> accountTasks = taskService.getAll(accountId);
         account.setTasks(accountTasks);
         return accountMapper.toResponse(account);
     }
 
     @Override
     public List<AccountResponse> getAll() {
-        List<Account> accounts = accountRepository.getAll();
+        List<Account> accounts = accountRepository.findAll();
         for (Account account: accounts) {
-            List<Task> accountTasks = taskService.getAllByAccountId(account.getId());
+            List<Task> accountTasks = taskService.getAll(account.getId());
             account.setTasks(accountTasks);
         }
         return accountMapper.toListResponses(accounts);
@@ -55,17 +58,19 @@ public class AccountServiceImpl implements AccountService {
 
     @CacheEvict(value = "accounts", key = "#accountId")
     @Override
-    public void update(UUID accountId, AccountRequest accountRequest) {
-        Account updatableAccount = accountMapper.toModel(accountRequest);
-        accountRepository.update(accountId, updatableAccount);
+    public void update(UUID accountId, AccountRequest accountRequest) throws AccountNotFoundException {
+        Account updatedAccount = accountMapper.toModel(accountRequest);
+        Account updatableAccount = getAccount(accountId);
+        updatableAccount.setUsername(updatedAccount.getUsername());
+        updatableAccount.setTasks(updatedAccount.getTasks());
+        accountRepository.save(updatableAccount);
     }
 
     @Transactional
     @CacheEvict(value = "accounts", key = "#accountId")
     @Override
     public void delete(UUID accountId) {
-        accountRepository.delete(accountId);
-        taskService.deleteAllByAccountId(accountId);
+        accountRepository.deleteById(accountId);
     }
 
     @Override
@@ -80,7 +85,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<TaskResponse> getAllTasks(UUID accountId, int page, int size) {
+    public Page<TaskResponse> getAllTasks(UUID accountId, int page, int size) {
         return taskService.getAllPaged(accountId, page, size);
     }
 
@@ -94,5 +99,13 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void deleteTask(UUID accountId, UUID taskId) {
         taskService.delete(taskId);
+    }
+
+    private Account getAccount(UUID accountId) {
+        Optional<Account> optionalAccount = accountRepository.findById(accountId);
+        if (optionalAccount.isEmpty()) {
+            throw new AccountNotFoundException(accountId);
+        }
+        return optionalAccount.get();
     }
 }
