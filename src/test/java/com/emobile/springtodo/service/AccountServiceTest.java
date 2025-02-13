@@ -10,13 +10,17 @@ import com.emobile.springtodo.exception.AccountAlreadyExistsException;
 import com.emobile.springtodo.exception.AccountNotFoundException;
 import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
-import com.emobile.springtodo.repository.AccountRepository;
+import com.emobile.springtodo.repository.AccountRepositoryImpl;
 import com.emobile.springtodo.util.AccountMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
@@ -37,7 +41,7 @@ public class AccountServiceTest {
     @Mock
     private TaskService taskService;
     @Mock
-    private AccountRepository accountRepository;
+    private AccountRepositoryImpl accountRepository;
 
     @Test
     public void successCreatingAccountTest() {
@@ -148,7 +152,6 @@ public class AccountServiceTest {
         UUID accountId = UUID.randomUUID();
 
         doNothing().when(accountRepository).delete(accountId);
-        doNothing().when(taskService).deleteAllByAccountId(accountId);
 
         assertDoesNotThrow(() -> accountService.delete(accountId));
     }
@@ -183,15 +186,17 @@ public class AccountServiceTest {
         UUID secondTaskId = UUID.randomUUID();
         TaskResponse firstTaskResponse = TaskResponse.builder().id(firstTaskId).build();
         TaskResponse secondTaskResponse = TaskResponse.builder().id(secondTaskId).build();
-        List<TaskResponse> expectedTaskResponses = List.of(firstTaskResponse, secondTaskResponse);
+        List<TaskResponse> taskResponses = List.of(firstTaskResponse, secondTaskResponse);
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<TaskResponse> expectedPagedTaskResponses = new PageImpl<>(taskResponses, pageable, 0);
 
-        when(taskService.getAllPaged(accountId,0,5)).thenReturn(expectedTaskResponses);
+        when(taskService.getAllPaged(accountId,0,5)).thenReturn(expectedPagedTaskResponses);
 
         assertDoesNotThrow(() -> accountService.getAllTasks(accountId,0,5));
-        List<TaskResponse> responses = accountService.getAllTasks(accountId,0,5);
-        assertEquals(expectedTaskResponses.size(), responses.size());
-        assertEquals(expectedTaskResponses.get(0).id(), responses.get(0).id());
-        assertEquals(expectedTaskResponses.get(1).id(), responses.get(1).id());
+        Page<TaskResponse> responses = accountService.getAllTasks(accountId,0,5);
+        assertEquals(expectedPagedTaskResponses.getTotalElements(), responses.getTotalElements());
+        assertEquals(expectedPagedTaskResponses.getContent().get(0).id(), responses.getContent().get(0).id());
+        assertEquals(expectedPagedTaskResponses.getContent().get(1).id(), responses.getContent().get(1).id());
     }
 
     @Test

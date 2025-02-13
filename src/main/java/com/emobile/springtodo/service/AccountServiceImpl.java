@@ -7,14 +7,14 @@ import com.emobile.springtodo.dto.response.AccountResponse;
 import com.emobile.springtodo.dto.response.TaskResponse;
 import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
-import com.emobile.springtodo.repository.AccountRepository;
+import com.emobile.springtodo.repository.AccountRepositoryImpl;
 import com.emobile.springtodo.util.AccountMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,7 @@ import java.util.UUID;
 public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
     private final TaskService taskService;
-    private final AccountRepository accountRepository;
+    private final AccountRepositoryImpl accountRepository;
 
     @CachePut(value = "accounts", key = "#result.id()")
     @Override
@@ -60,12 +60,10 @@ public class AccountServiceImpl implements AccountService {
         accountRepository.update(accountId, updatableAccount);
     }
 
-    @Transactional
     @CacheEvict(value = "accounts", key = "#accountId")
     @Override
     public void delete(UUID accountId) {
         accountRepository.delete(accountId);
-        taskService.deleteAllByAccountId(accountId);
     }
 
     @Override
@@ -80,7 +78,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<TaskResponse> getAllTasks(UUID accountId, int page, int size) {
+    public Page<TaskResponse> getAllTasks(UUID accountId, int page, int size) {
         return taskService.getAllPaged(accountId, page, size);
     }
 

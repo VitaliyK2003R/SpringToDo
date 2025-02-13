@@ -3,6 +3,7 @@ package com.emobile.springtodo.service;
 import com.emobile.springtodo.dto.request.TaskRequest;
 import com.emobile.springtodo.dto.request.UpdateTaskRequest;
 import com.emobile.springtodo.dto.response.TaskResponse;
+import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
 import com.emobile.springtodo.repository.TaskRepository;
 import com.emobile.springtodo.util.TaskMapper;
@@ -11,6 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
@@ -65,13 +70,16 @@ public class TaskServiceTest {
     public void successGettingAllAccountTasksTest() {
         UUID accountId = UUID.randomUUID();
         List<Task> tasks = Collections.emptyList();
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Task> pagedTasks = new PageImpl<>(tasks, pageable, 0);
         List<TaskResponse> taskResponses = Collections.emptyList();
+        Page<TaskResponse> pagedTaskResponses = new PageImpl<>(taskResponses, pageable, 0);
 
-        when(taskService.getAllByAccountId(accountId)).thenReturn(tasks);
-        when(taskMapper.toListResponses(tasks)).thenReturn(taskResponses);
+        when(taskRepository.getAllPagedByAccountId(accountId, 0, 5)).thenReturn(pagedTasks);
+        when(taskMapper.toPagedResponses(pagedTasks)).thenReturn(pagedTaskResponses);
 
         assertDoesNotThrow(() -> taskService.getAllPaged(accountId, 0, 5));
-        assertEquals(0, taskService.getAllPaged(accountId,0,5).size());
+        assertEquals(0, taskService.getAllPaged(accountId,0,5).getTotalElements());
     }
 
     @Test
@@ -98,10 +106,13 @@ public class TaskServiceTest {
     @Test
     public void successGettingAllByAccountIdTest() {
         UUID accountId = UUID.randomUUID();
+        Account account = Account.builder().id(accountId).build();
         UUID taskId = UUID.randomUUID();
-        List<Task> tasks = List.of(Task.builder().id(taskId).accountId(accountId).build());
+        List<Task> tasks = List.of(Task.builder().id(taskId).account(account).build());
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Task> pagedTasks = new PageImpl<>(tasks, pageable, 0);
 
-        when(taskRepository.getAllPagedByAccountId(accountId, 0, 5)).thenReturn(tasks);
+        when(taskRepository.getAllPagedByAccountId(accountId, 0, 5)).thenReturn(pagedTasks);
 
         assertDoesNotThrow(() -> taskService.getAllByAccountId(accountId));
         List<Task> responses = taskService.getAllByAccountId(accountId);

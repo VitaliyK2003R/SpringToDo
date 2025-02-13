@@ -3,10 +3,12 @@ package com.emobile.springtodo.service;
 import com.emobile.springtodo.dto.request.TaskRequest;
 import com.emobile.springtodo.dto.request.UpdateTaskRequest;
 import com.emobile.springtodo.dto.response.TaskResponse;
+import com.emobile.springtodo.model.Account;
 import com.emobile.springtodo.model.Task;
 import com.emobile.springtodo.repository.TaskRepository;
 import com.emobile.springtodo.util.TaskMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +23,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse create(UUID accountId, TaskRequest taskRequest) {
         Task task = taskMapper.toModel(taskRequest);
-        task.setAccountId(accountId);
+        task.setAccount(Account.builder().id(accountId).build());
         task = taskRepository.create(task);
         return taskMapper.toResponse(task);
     }
@@ -32,8 +34,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getAllPaged(UUID accountId, int page, int size) {
-        return taskMapper.toListResponses(taskRepository.getAllPagedByAccountId(accountId, page, size));
+    public Page<TaskResponse> getAllPaged(UUID accountId, int page, int size) {
+        return taskMapper.toPagedResponses(taskRepository.getAllPagedByAccountId(accountId, page, size));
     }
 
     @Override
@@ -48,7 +50,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<Task> getAllByAccountId(UUID accountId) {
-        return taskRepository.getAllPagedByAccountId(accountId, 0, 5);
+        return taskRepository.getAllPagedByAccountId(accountId, 0, 5).getContent();
     }
 
     @Override

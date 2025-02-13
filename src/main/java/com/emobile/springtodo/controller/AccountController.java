@@ -8,6 +8,7 @@ import com.emobile.springtodo.dto.response.AccountResponse;
 import com.emobile.springtodo.dto.response.TaskResponse;
 import com.emobile.springtodo.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,8 +62,8 @@ public class AccountController implements AccountApi {
     }
 
     @Override
-    public ResponseEntity<List<TaskResponse>> getAllTasks(UUID accountId, int page, int size) {
-        List<TaskResponse> taskResponses = accountService.getAllTasks(accountId, page, size);
+    public ResponseEntity<Page<TaskResponse>> getAllTasks(UUID accountId, int page, int size) {
+        Page<TaskResponse> taskResponses = accountService.getAllTasks(accountId, page, size);
         return new ResponseEntity<>(taskResponses, HttpStatus.OK);
     }
 

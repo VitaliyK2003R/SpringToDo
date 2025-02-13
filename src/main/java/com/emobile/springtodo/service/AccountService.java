@@ -5,6 +5,7 @@ import com.emobile.springtodo.dto.request.TaskRequest;
 import com.emobile.springtodo.dto.request.UpdateTaskRequest;
 import com.emobile.springtodo.dto.response.AccountResponse;
 import com.emobile.springtodo.dto.response.TaskResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +18,7 @@ public interface AccountService {
     void delete(UUID accountId);
     TaskResponse createTask(UUID accountId, TaskRequest taskRequest);
     TaskResponse getTask(UUID accountId, UUID taskId);
-    List<TaskResponse> getAllTasks(UUID accountId, int page, int size);
+    Page<TaskResponse> getAllTasks(UUID accountId, int page, int size);
     void updateTask(UUID accountId, UUID taskId, UpdateTaskRequest taskRequest);
     void deleteTask(UUID accountId, UUID taskId);
 }

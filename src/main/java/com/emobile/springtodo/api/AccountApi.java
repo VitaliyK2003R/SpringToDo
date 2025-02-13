@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -113,7 +114,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "200", description = "информация о задачах получена"),
             @ApiResponse(responseCode = "201", description = "информация о задачах получена"),
     })
-    ResponseEntity<List<TaskResponse>> getAllTasks(
+    ResponseEntity<Page<TaskResponse>> getAllTasks(
             @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
             @Parameter(description = "Номер страницы, начиная с 0")
             @RequestParam(required = false, defaultValue = "0") @Min(0) @Max(50) int page,
