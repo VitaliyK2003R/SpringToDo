@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: SpringToDo
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  datasource:
+    url: jdbc:postgresql://localhost:5432/to_do_base
+    driver-class-name: org.postgresql.Driver
+    username:
+    password:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+server:
+  port:
