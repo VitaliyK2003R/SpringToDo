@@ -46,7 +46,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<AccountResponse> getAll() {
         List<Account> accounts = accountRepository.getAll();
-        for (Account account: accounts) {
+        for (Account account : accounts) {
             List<Task> accountTasks = taskService.getAllByAccountId(account.getId());
             account.setTasks(accountTasks);
         }

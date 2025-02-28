@@ -10,6 +10,11 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
+/**
+ * Task mapstruct mapper.
+ *
+ * @author Vitaliy
+ */
 @Mapper(componentModel = "spring")
 public interface TaskMapper {
     @Mapping(target = "id", ignore = true)
@@ -43,5 +48,6 @@ public interface TaskMapper {
     AccountTaskResponse toAccountResponse(Task task);
 
     List<TaskResponse> toListResponses(List<Task> tasks);
+
     List<AccountTaskResponse> toListAccountResponses(List<Task> tasks);
 }

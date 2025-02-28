@@ -112,7 +112,7 @@ public class AccountControllerTest {
         return AccountResponse.builder().username(username).build();
     }
 
-    private List<AccountResponse> createAccountResponses(String ... usernames) {
+    private List<AccountResponse> createAccountResponses(String... usernames) {
         List<AccountResponse> accountResponses = new ArrayList<>();
         for (String username : usernames) {
             accountResponses.add(createAccountResponse(username));

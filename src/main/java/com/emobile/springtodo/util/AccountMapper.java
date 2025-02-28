@@ -13,6 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Account mapstruct mapper.
+ *
+ * @author Vitaliy
+ */
 @Mapper(componentModel = "spring")
 public abstract class AccountMapper {
     @Autowired

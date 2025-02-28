@@ -17,4 +17,5 @@ public record AccountTaskResponse(
         @Schema(description = "время начала задачи задачи")
         LocalDateTime start,
         @Schema(description = "время окончания задачи задачи")
-        LocalDateTime finish) {}
+        LocalDateTime finish) {
+}

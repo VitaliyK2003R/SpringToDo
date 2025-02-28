@@ -109,7 +109,7 @@ public class AccountControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private List<AccountResponse> createAccounts(String ... usernames) {
+    private List<AccountResponse> createAccounts(String... usernames) {
         List<AccountResponse> accountResponses = new ArrayList<>();
         for (String username : usernames) {
             accountResponses.add(createAccount(username));

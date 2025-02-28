@@ -37,10 +37,10 @@ public class AccountNamedParameterJDBCTemplateRepository implements AccountRepos
         KeyHolder keyHolder = new GeneratedKeyHolder();
         SqlParameterSource parameterSource = new MapSqlParameterSource(accountParameters);
         int countChanges = namedParameterJdbcTemplate.update(
-                                                            "insert into account (username) values (:username)",
-                                                                parameterSource,
-                                                                keyHolder
-                                                            );
+                "insert into account (username) values (:username)",
+                parameterSource,
+                keyHolder
+        );
         if (countChanges != 1) {
             throw new SQLProcessChangesException("Invalid result count changes in data base");
         }

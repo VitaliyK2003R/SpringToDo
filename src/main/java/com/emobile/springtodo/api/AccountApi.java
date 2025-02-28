@@ -21,6 +21,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * API for interaction with accounts and their tasks.
+ *
+ * @author Vitaliy
+ */
 @OpenAPIDefinition(
         info = @Info(
                 title = "Account api",
@@ -52,7 +57,7 @@ public interface AccountApi {
             @ApiResponse(responseCode = "201", description = "информация об аккаунте получена"),
             @ApiResponse(responseCode = "400", description = "ошибка валидации")
     })
-    ResponseEntity<AccountResponse> get(@Parameter(description ="Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId);
+    ResponseEntity<AccountResponse> get(@Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId);
 
     @GetMapping
     @Operation(summary = "Получение всех данных о всех аккаунтах")
@@ -71,7 +76,7 @@ public interface AccountApi {
     })
     void update(
             @Parameter(description = "Идентификатор аккаунта") @PathVariable(name = "accountId") UUID accountId,
-            @Parameter(description =    "Входные данные при обновлении аккаунта")
+            @Parameter(description = "Входные данные при обновлении аккаунта")
             @RequestBody @Valid AccountRequest accountRequest);
 
     @DeleteMapping("/{accountId}")

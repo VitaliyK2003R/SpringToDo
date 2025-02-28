@@ -5,11 +5,21 @@ import com.emobile.springtodo.model.Task;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * CRUD task repository operations.
+ *
+ * @author Vitaliy
+ */
 public interface TaskRepository {
     Task create(Task task);
+
     Task get(UUID taskId);
+
     void update(UUID taskId, Task task);
+
     void delete(UUID taskId);
+
     List<Task> getAllPagedByAccountId(UUID accountId, int page, int size);
+
     void deleteAllByAccountId(UUID accountId);
 }

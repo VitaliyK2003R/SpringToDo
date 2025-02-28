@@ -53,10 +53,10 @@ public class TaskNamedParameterJDBCTemplateRepository implements TaskRepository 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int countChanges = namedParameterJdbcTemplate.update(
                 """
-                    insert into task (name, title, start, finish, account_id)
-                    values (:name, :title, :start, :finish, :accountId)
-                    returning task.id
-                    """,
+                        insert into task (name, title, start, finish, account_id)
+                        values (:name, :title, :start, :finish, :accountId)
+                        returning task.id
+                        """,
                 parameterSource,
                 keyHolder);
         if (countChanges != 1) {
@@ -80,11 +80,11 @@ public class TaskNamedParameterJDBCTemplateRepository implements TaskRepository 
     public void update(UUID taskId, Task task) {
         int countChanges = namedParameterJdbcTemplate.update(
                 """
-                        update task
-                        set name = :name, title = :title, start = :start, finish = :finish, account_id = :accountId
-                        where task.id = :taskId
-                    """,
-                Map.of( QUERY_TASK_NAME_PARAMETER_NAME, task.getName(),
+                            update task
+                            set name = :name, title = :title, start = :start, finish = :finish, account_id = :accountId
+                            where task.id = :taskId
+                        """,
+                Map.of(QUERY_TASK_NAME_PARAMETER_NAME, task.getName(),
                         QUERY_TASK_TITLE_PARAMETER_NAME, task.getTitle(),
                         QUERY_TASK_START_PARAMETER_NAME, task.getStart(),
                         QUERY_TASK_FINISH_PARAMETER_NAME, task.getFinish(),

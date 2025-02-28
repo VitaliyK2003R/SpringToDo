@@ -15,4 +15,5 @@ public record AccountResponse(
         @Schema(description = "имя аккаунта")
         String username,
         @Schema(description = "Задачи аккаунта")
-        List<AccountTaskResponse> accountTaskResponses) implements Serializable {}
+        List<AccountTaskResponse> accountTaskResponses) implements Serializable {
+}

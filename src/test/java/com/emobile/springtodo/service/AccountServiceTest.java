@@ -103,7 +103,7 @@ public class AccountServiceTest {
     public void getAllTest() {
         UUID firstAccountId = UUID.randomUUID();
         UUID secondAccountId = UUID.randomUUID();
-        List<Account> accounts = List.of(   Account.builder().id(firstAccountId).build(),
+        List<Account> accounts = List.of(Account.builder().id(firstAccountId).build(),
                 Account.builder().id(secondAccountId).build());
         List<Task> firstAccountTasks = Collections.emptyList();
         List<Task> secondAccountTasks = List.of(Task.builder().build());
@@ -185,10 +185,10 @@ public class AccountServiceTest {
         TaskResponse secondTaskResponse = TaskResponse.builder().id(secondTaskId).build();
         List<TaskResponse> expectedTaskResponses = List.of(firstTaskResponse, secondTaskResponse);
 
-        when(taskService.getAllPaged(accountId,0,5)).thenReturn(expectedTaskResponses);
+        when(taskService.getAllPaged(accountId, 0, 5)).thenReturn(expectedTaskResponses);
 
-        assertDoesNotThrow(() -> accountService.getAllTasks(accountId,0,5));
-        List<TaskResponse> responses = accountService.getAllTasks(accountId,0,5);
+        assertDoesNotThrow(() -> accountService.getAllTasks(accountId, 0, 5));
+        List<TaskResponse> responses = accountService.getAllTasks(accountId, 0, 5);
         assertEquals(expectedTaskResponses.size(), responses.size());
         assertEquals(expectedTaskResponses.get(0).id(), responses.get(0).id());
         assertEquals(expectedTaskResponses.get(1).id(), responses.get(1).id());

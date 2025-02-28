@@ -9,9 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * Handler for all service exceptions/
+ *
+ * @author Vitaliy
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler({ AccountAlreadyExistsException.class, AccountNotFoundException.class})
+    @ExceptionHandler({AccountAlreadyExistsException.class, AccountNotFoundException.class})
     public ResponseEntity<ExceptionResponse> handleBadRequestException(Exception ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);

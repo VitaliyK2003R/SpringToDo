@@ -71,7 +71,7 @@ public class TaskServiceTest {
         when(taskMapper.toListResponses(tasks)).thenReturn(taskResponses);
 
         assertDoesNotThrow(() -> taskService.getAllPaged(accountId, 0, 5));
-        assertEquals(0, taskService.getAllPaged(accountId,0,5).size());
+        assertEquals(0, taskService.getAllPaged(accountId, 0, 5).size());
     }
 
     @Test

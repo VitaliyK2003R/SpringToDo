@@ -20,4 +20,5 @@ public record TaskResponse(
         @Schema(description = "время окончания задачи задачи")
         LocalDateTime finish,
         @Schema(description = "идентификатор аккаунта")
-        UUID accountId) implements Serializable {}
+        UUID accountId) implements Serializable {
+}
