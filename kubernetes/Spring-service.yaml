@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-service
+  labels:
+    name: spring-service
+    type: backend
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30005
+  selector:
+    app: spring-pod
+    type: backend
