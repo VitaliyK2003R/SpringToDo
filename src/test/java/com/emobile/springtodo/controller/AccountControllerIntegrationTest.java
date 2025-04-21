@@ -47,6 +47,9 @@ public class AccountControllerIntegrationTest {
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+            .withDatabaseName("testdb")
+            .withUsername("testuser")
+            .withPassword("testpass")
             .withStartupTimeout(Duration.ofMinutes(2))
             .waitingFor(
                     Wait.forLogMessage(".*database system is ready to accept connections.*", 1)
@@ -60,7 +63,7 @@ public class AccountControllerIntegrationTest {
 
     @DynamicPropertySource
     static void configureDatasource(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.url", () -> "jdbc:postgresql://postgres-test:5432/testdb");
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.liquibase.url", postgres::getJdbcUrl);
