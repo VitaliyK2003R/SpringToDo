@@ -48,8 +48,9 @@ public class AccountControllerIntegrationTest {
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
             .withStartupTimeout(Duration.ofMinutes(2))
-            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 1))
-            .waitingFor(Wait.forListeningPort());
+            .waitingFor(
+                    Wait.forLogMessage(".*database system is ready to accept connections.*", 1)
+                            .withStartupTimeout(Duration.ofMinutes(2)));
     @Container
     @ServiceConnection(name = "redis")
     static GenericContainer<?> redisContainer =
