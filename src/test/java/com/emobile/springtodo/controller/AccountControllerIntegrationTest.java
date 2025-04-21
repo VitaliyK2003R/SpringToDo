@@ -18,10 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -50,23 +48,19 @@ public class AccountControllerIntegrationTest {
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass")
-            .withStartupTimeout(Duration.ofMinutes(2))
-            .waitingFor(
-                    Wait.forLogMessage(".*database system is ready to accept connections.*", 1)
-                            .withStartupTimeout(Duration.ofMinutes(2)));
+            .withNetworkAliases("postgres-test")
+            .withStartupTimeout(Duration.ofMinutes(2));
+
     @Container
-    @ServiceConnection(name = "redis")
-    static GenericContainer<?> redisContainer =
-            new GenericContainer<>(DockerImageName.parse("redis:6.2-alpine"))
-                    .withExposedPorts(6379)
-                    .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*", 1));
+    static GenericContainer<?> redis = new GenericContainer<>("redis:6.2-alpine")
+            .withExposedPorts(6379)
+            .withNetworkAliases("redis-test");
 
     @DynamicPropertySource
-    static void configureDatasource(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", () -> "jdbc:postgresql://postgres-test:5432/testdb");
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.liquibase.url", postgres::getJdbcUrl);
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
     }
 
     @Test
