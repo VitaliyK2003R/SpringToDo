@@ -48,13 +48,17 @@ public class AccountControllerIntegrationTest {
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass")
-            .withNetworkAliases("postgres-test")
             .withStartupTimeout(Duration.ofMinutes(2));
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:6.2-alpine")
-            .withExposedPorts(6379)
-            .withNetworkAliases("redis-test");
+            .withExposedPorts(6379);
+
+    @DynamicPropertySource
+    static void configureRedis(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
