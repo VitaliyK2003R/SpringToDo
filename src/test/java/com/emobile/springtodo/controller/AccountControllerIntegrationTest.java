@@ -53,6 +53,7 @@ public class AccountControllerIntegrationTest {
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass")
+            .withNetworkAliases("postgres")
             .withNetwork(network)
             .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("postgres")));
     ;
@@ -64,13 +65,13 @@ public class AccountControllerIntegrationTest {
 
     @DynamicPropertySource
     static void configureRedis(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url",
+                () -> String.format("jdbc:postgresql://%s:%d/testdb",
+                        postgres.getContainerInfo().getConfig().getHostName(),
+                        postgres.getMappedPort(5432)));
+
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", redis::getFirstMappedPort);
-        registry.add("spring.redis.host", redis::getHost);
-        registry.add("spring.redis.port", redis::getFirstMappedPort);
-
-        System.out.println("PostgreSQL URL: " + postgres.getJdbcUrl());
-        System.out.println("Redis host:port: " + redis.getHost() + ":" + redis.getFirstMappedPort());
     }
 
     @Test
