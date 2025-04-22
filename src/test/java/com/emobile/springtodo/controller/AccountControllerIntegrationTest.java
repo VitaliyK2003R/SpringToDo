@@ -61,13 +61,6 @@ public class AccountControllerIntegrationTest {
         System.out.println("Redis host:port: " + redis.getHost() + ":" + redis.getFirstMappedPort());
     }
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
-    }
-
     @Test
     public void successCreatingAccountTest() throws Exception {
         AccountRequest actualAccountRequest = AccountRequest.builder().username("account").build();
