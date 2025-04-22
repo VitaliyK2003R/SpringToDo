@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -23,7 +22,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,28 +46,39 @@ public class AccountControllerIntegrationTest {
     private static final Network network = Network.newNetwork();
 
     @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    public static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass")
-            .withNetworkAliases("postgres")
             .withNetwork(network)
+            .withNetworkAliases("postgres")
             .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("postgres")));
-    ;
 
     @Container
-    @ServiceConnection
-    static RedisContainer redis = new RedisContainer(DockerImageName.parse("redis:6.2-alpine"))
+    public static RedisContainer redis = new RedisContainer("redis:6.2-alpine")
             .withNetwork(network)
             .withExposedPorts(6379);
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        System.out.println("PostgreSQL container host: " + postgres.getHost());
-        System.out.println("PostgreSQL container internal hostname: " +
-                postgres.getContainerInfo().getConfig().getHostName());
-        System.out.println("PostgreSQL mapped port: " + postgres.getMappedPort(5432));
+        registry.add("spring.datasource.url", () ->
+                String.format("jdbc:postgresql://%s:%d/testdb",
+                        postgres.getHost(),       // Используем хост (работает и локально и в Jenkins)
+                        postgres.getMappedPort(5432))); // Маппированный порт
+
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+
+        // Настройка Redis
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+
+        // Логирование для отладки
+        System.out.println("PostgreSQL URL: " +
+                String.format("jdbc:postgresql://%s:%d/testdb",
+                        postgres.getHost(),
+                        postgres.getMappedPort(5432)));
+        System.out.println("Redis host:port: " + redis.getHost() + ":" + redis.getFirstMappedPort());
     }
 
     @Test
