@@ -6,7 +6,6 @@ import com.emobile.springtodo.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,13 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -45,32 +40,15 @@ public class AccountControllerIntegrationTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    private static final Network network = Network.newNetwork();
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
-            .withDatabaseName("testdb")
-            .withUsername("testuser")
-            .withPassword("testpass")
-            .withNetworkAliases("postgres")
-            .withNetwork(network)
-            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("postgres")));
-    ;
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Container
     @ServiceConnection
     static RedisContainer redis = new RedisContainer(DockerImageName.parse("redis:6.2-alpine"))
-            .withNetwork(network)
             .withExposedPorts(6379);
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        System.out.println("PostgreSQL container host: " + postgres.getHost());
-        System.out.println("PostgreSQL container internal hostname: " +
-                postgres.getContainerInfo().getConfig().getHostName());
-        System.out.println("PostgreSQL mapped port: " + postgres.getMappedPort(5432));
-    }
 
     @Test
     public void successCreatingAccountTest() throws Exception {
