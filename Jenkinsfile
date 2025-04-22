@@ -15,13 +15,9 @@ pipeline {
                     reuseNode true
                 }
             }
-            environment {
-                MAVEN_USER_HOME = "/var/maven"
-            }
             steps {
-                sh 'chmod +x mvnw'
-                sh './mvnw compile'
-                sh './mvnw test'
+                sh 'mvn compile'
+                sh 'mvn test'
             }
         }
     }
