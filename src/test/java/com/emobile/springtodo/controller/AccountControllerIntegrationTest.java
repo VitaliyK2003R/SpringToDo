@@ -59,19 +59,17 @@ public class AccountControllerIntegrationTest {
     ;
 
     @Container
+    @ServiceConnection
     static RedisContainer redis = new RedisContainer(DockerImageName.parse("redis:6.2-alpine"))
             .withNetwork(network)
             .withExposedPorts(6379);
 
     @DynamicPropertySource
-    static void configureRedis(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url",
-                () -> String.format("jdbc:postgresql://%s:%d/testdb",
-                        postgres.getContainerInfo().getConfig().getHostName(),
-                        postgres.getMappedPort(5432)));
-
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        System.out.println("PostgreSQL container host: " + postgres.getHost());
+        System.out.println("PostgreSQL container internal hostname: " +
+                postgres.getContainerInfo().getConfig().getHostName());
+        System.out.println("PostgreSQL mapped port: " + postgres.getMappedPort(5432));
     }
 
     @Test
