@@ -4,6 +4,7 @@ import com.emobile.springtodo.dto.request.AccountRequest;
 import com.emobile.springtodo.dto.response.AccountResponse;
 import com.emobile.springtodo.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
@@ -16,10 +17,10 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,13 +50,15 @@ public class AccountControllerIntegrationTest {
             .withPassword("testpass");
 
     @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis:6.2-alpine")
+    static RedisContainer redis = new RedisContainer(DockerImageName.parse("redis:6.2-alpine"))
             .withExposedPorts(6379);
 
     @DynamicPropertySource
     static void configureRedis(DynamicPropertyRegistry registry) {
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+        registry.add("spring.redis.host", redis::getHost);
+        registry.add("spring.redis.port", redis::getFirstMappedPort);
 
         System.out.println("PostgreSQL URL: " + postgres.getJdbcUrl());
         System.out.println("Redis host:port: " + redis.getHost() + ":" + redis.getFirstMappedPort());
