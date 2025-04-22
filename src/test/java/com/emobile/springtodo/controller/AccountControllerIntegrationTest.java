@@ -21,7 +21,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -47,8 +46,7 @@ public class AccountControllerIntegrationTest {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("testdb")
             .withUsername("testuser")
-            .withPassword("testpass")
-            .withStartupTimeout(Duration.ofMinutes(2));
+            .withPassword("testpass");
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:6.2-alpine")
@@ -58,6 +56,9 @@ public class AccountControllerIntegrationTest {
     static void configureRedis(DynamicPropertyRegistry registry) {
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+
+        System.out.println("PostgreSQL URL: " + postgres.getJdbcUrl());
+        System.out.println("Redis host:port: " + redis.getHost() + ":" + redis.getFirstMappedPort());
     }
 
     @DynamicPropertySource
