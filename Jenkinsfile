@@ -7,27 +7,19 @@ pipeline {
                 checkout scm
             }
         }
-        stage("Prepare container") {
+        stage("Build & Test") {
             agent {
                 docker {
-                    image 'openjdk:21-jdk-oracle'
-                    args '-v $HOME/.m2:/root/.m2'
+                    image 'maven:3.9.6-openjdk-21'
+                    args '-v $HOME/.m2:/var/maven/.m2 -e MAVEN_OPTS="-Duser.home=/var/maven"'
                     reuseNode true
                 }
             }
-            stages {
-                stage('Build') {
-                    steps {
-                        sh 'ls -la'
-                        sh 'chmod +x mvnw'
-                        sh './mvnw compile'
-                    }
-                }
-                stage('Test') {
-                    steps {
-                        sh './mvnw test'
-                    }
-                }
+            steps {
+                sh 'ls -la'
+                sh 'chmod +x mvnw'
+                sh './mvnw compile'
+                sh './mvnw test'
             }
         }
     }
