@@ -11,7 +11,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3.9.9-amazoncorretto-21-alpine'
-                    args '-v $HOME/.m2:/var/maven/.m2 -e MAVEN_OPTS="-Duser.home=/var/maven"'
+                    args '-v $HOME/.m2:/var/maven/.m2'
                     reuseNode true
                 }
             }
