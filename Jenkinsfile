@@ -1,25 +1,33 @@
 pipeline {
-  agent none
-  stages {
-    stage("Prepare container") {
-      agent {
-        docker {
-          image 'openjdk:21-jdk-oracle'
-          args '-v $HOME/.m2:/root/.m2'
-        }
-      }
-      stages {
-        stage('Build') {
+    agent none
+    stages {
+        stage("Checkout") {
+            agent any
             steps {
-                sh './mvnw compile'
+                checkout scm
             }
         }
-        stage('Test') {
-            steps {
-                sh './mvnw test'
+        stage("Prepare container") {
+            agent {
+                docker {
+                    image 'openjdk:21-jdk-oracle'
+                    args '-v $HOME/.m2:/root/.m2'
+                    reuseNode true
+                }
+            }
+            stages {
+                stage('Build') {
+                    steps {
+                        sh 'ls -la'
+                        sh './mvnw compile'
+                    }
+                }
+                stage('Test') {
+                    steps {
+                        sh './mvnw test'
+                    }
+                }
             }
         }
-      }
     }
-  }
 }
