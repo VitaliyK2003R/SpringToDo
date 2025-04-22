@@ -19,6 +19,7 @@ pipeline {
                 stage('Build') {
                     steps {
                         sh 'ls -la'
+                        sh 'chmod +x mvnw'
                         sh './mvnw compile'
                     }
                 }
