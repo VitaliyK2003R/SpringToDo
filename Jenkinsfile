@@ -10,7 +10,7 @@ pipeline {
         stage("Build & Test") {
             agent {
                 docker {
-                    image 'maven:3.9.6-openjdk-21'
+                    image 'maven:3.9.9-amazoncorretto-21-alpine'
                     args '-v $HOME/.m2:/var/maven/.m2 -e MAVEN_OPTS="-Duser.home=/var/maven"'
                     reuseNode true
                 }
