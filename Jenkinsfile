@@ -21,6 +21,12 @@ pipeline {
                 }
             }
             steps {
+                sh '''
+                        echo "Current user: $(whoami)"
+                        echo "Home directory: $HOME"
+                        echo "Contents of /home:"
+                        ls -la /home
+                    '''
                 sh 'mvn compile'
                 sh 'mvn test'
             }
