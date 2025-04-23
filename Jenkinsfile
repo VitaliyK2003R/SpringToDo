@@ -1,33 +1,18 @@
 pipeline {
-    agent none
-    environment {
-        DOCKER_HOST = "tcp://docker:2376"
-        DOCKER_TLS_VERIFY = "1"
-        DOCKER_CERT_PATH = "/certs/client"
+    agent any
+    tools {
+        jdk 'Java21'
+        maven 'Maven3'
     }
     stages {
-        stage("Checkout") {
-            agent any
+        stage("Cleanup") {
             steps {
-                checkout scm
+                cleanWs()
             }
         }
-        stage("Build & Test") {
-            agent {
-                docker {
-                    image 'maven:3.9.9-amazoncorretto-21-alpine'
-                    args '''
-                        -v $HOME/.m2:/home/maven/.m2
-                        -u maven
-                        -e MAVEN_OPTS="-Duser.home=/home/maven"
-                    '''
-                    reuseNode true
-                }
-            }
+        stage("Checkout") {
             steps {
-                sh 'mvn -version'
-                sh 'mvn compile'
-                sh 'mvn test'
+                git branch: 'develop', credentialsId: 'github', url: 'https://github.com/VitaliyK2003R/SpringToDo.git'
             }
         }
     }
