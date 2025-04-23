@@ -5,6 +5,7 @@ pipeline {
         maven 'Maven3'
     }
     stages {
+
         stage("Cleanup") {
             steps {
                 cleanWs()
@@ -17,12 +18,12 @@ pipeline {
         }
         stage("Build") {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean package -u root'
             }
         }
         stage("Test") {
             steps {
-                sh 'mvn test'
+                sh 'mvn test -u root'
             }
         }
     }
