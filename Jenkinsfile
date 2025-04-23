@@ -16,17 +16,16 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3.9.9-amazoncorretto-21-alpine'
-                    args '-v $HOME/.m2:/var/maven/.m2'
+                    args '''
+                        -v $HOME/.m2:/home/maven/.m2
+                        -u maven
+                        -e MAVEN_OPTS="-Duser.home=/home/maven"
+                    '''
                     reuseNode true
                 }
             }
             steps {
-                sh '''
-                        echo "Current user: $(whoami)"
-                        echo "Home directory: $HOME"
-                        echo "Contents of /home:"
-                        ls -la /home
-                    '''
+                sh 'mvn -version'
                 sh 'mvn compile'
                 sh 'mvn test'
             }
