@@ -5,7 +5,6 @@ pipeline {
         maven 'Maven3'
     }
     stages {
-
         stage("Cleanup") {
             steps {
                 cleanWs()
@@ -16,14 +15,31 @@ pipeline {
                 git branch: 'develop', credentialsId: 'github', url: 'https://github.com/VitaliyK2003R/SpringToDo.git'
             }
         }
+        stage("Prepare Maven") {
+            steps {
+                sh '''
+                    mkdir -p ${WORKSPACE}/.m2
+                    cp -n /var/jenkins_home/.m2/settings.xml ${WORKSPACE}/.m2/ || true
+                '''
+            }
+        }
+        stage("Debug") {
+            steps {
+                sh '''
+                    echo "Workspace: ${WORKSPACE}"
+                    ls -la ${WORKSPACE}
+                    whoami
+                '''
+            }
+        }
         stage("Build") {
             steps {
-                sh 'mvn clean package -u root'
+                sh 'mvn clean package -Dmaven.repo.local=${WORKSPACE}/.m2/repository'
             }
         }
         stage("Test") {
             steps {
-                sh 'mvn test -u root'
+                sh 'mvn test -Dmaven.repo.local=${WORKSPACE}/.m2/repository'
             }
         }
     }
