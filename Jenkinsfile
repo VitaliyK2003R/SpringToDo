@@ -15,5 +15,15 @@ pipeline {
                 git branch: 'develop', credentialsId: 'github', url: 'https://github.com/VitaliyK2003R/SpringToDo.git'
             }
         }
+        stage("Build") {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage("Test") {
+            steps {
+                sh 'mvn test'
+            }
+        }
     }
 }
