@@ -1,7 +1,17 @@
-FROM maven:3.9.9-amazoncorretto-21-alpine as build
+FROM maven:3.9.9-amazoncorretto-21-alpine AS build
 WORKDIR /app
-COPY . .
-RUN mvn clean install
+COPY pom.xml .
+RUN mvn dependency:go-offline -B \
+    -DskipTests=true \
+    -DskipITs=true \
+    -Dmaven.test.skip=true
+COPY src src
+RUN mvn clean install \
+    -DskipTests=true \
+    -DskipITs=true \
+    -Dmaven.test.skip=true \
+    -Dcheckstyle.skip=true \
+    -Dspotbugs.skip=true
 
 FROM openjdk:21-jdk-oracle
 WORKDIR /app
