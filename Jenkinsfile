@@ -23,15 +23,6 @@ pipeline {
                 '''
             }
         }
-        stage("Debug") {
-            steps {
-                sh '''
-                    echo "Workspace: ${WORKSPACE}"
-                    ls -la ${WORKSPACE}
-                    whoami
-                '''
-            }
-        }
         stage("Build") {
             steps {
                 sh 'mvn clean package -Dmaven.repo.local=${WORKSPACE}/.m2/repository'
