@@ -8,7 +8,6 @@ pipeline {
         APP_NAME = "SpringToDo"
         RELEASE = "1.0.0"
         DOCKER_USER = "vkontakte001"
-        DOCKER_PASS = credentials("jenkins-token")
         IMAGE_NAME = "${DOCKER_USER}/${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
@@ -50,11 +49,17 @@ pipeline {
         stage("Build and push Docker image") {
             steps {
                 script {
-                    sh """
-                        docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-                    """
-                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}").push()
-                    docker.build("${IMAGE_NAME}:latest").push()
+                    withCredentials([usernamePassword(
+                        credentialsId: 'jenkins-token',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )]) {
+                        sh '''
+                            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        '''
+                        docker.build("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.build("${IMAGE_NAME}:latest").push()
+                    }
                 }
             }
         }
