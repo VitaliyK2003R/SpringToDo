@@ -8,7 +8,7 @@ pipeline {
         APP_NAME = "SpringToDo"
         RELEASE = "1.0.0"
         DOCKER_USER = "vkontakte001"
-        DOCKER_PASS = "dockerhub"
+        DOCKER_PASS = credentials("dockerhub")
         IMAGE_NAME = "${DOCKER_USER}/${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
@@ -50,13 +50,11 @@ pipeline {
         stage("Build and push Docker image") {
             steps {
                 script {
-                    docker.withRepository('', DOCKER_PASS) {
-                        docker_image = docker.build "${IMAGE_NAME}"
-                    }
-                    docker.withRepository('', DOCKER_PASS) {
-                        docker_image.push("${IMAGE_TAG}")
-                        docker_image.push("latest")
-                    }
+                    sh """
+                        docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+                    """
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                    docker.build("${IMAGE_NAME}:latest").push()
                 }
             }
         }
