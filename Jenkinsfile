@@ -8,7 +8,7 @@ pipeline {
         APP_NAME = "SpringToDo"
         RELEASE = "1.0.0"
         DOCKER_USER = "vkontakte001"
-        DOCKER_PASS = credentials("dockerhub")
+        DOCKER_PASS = credentials("jenkins-token")
         IMAGE_NAME = "${DOCKER_USER}/${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
