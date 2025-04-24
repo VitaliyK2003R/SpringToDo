@@ -5,7 +5,7 @@ pipeline {
         maven "Maven3"
     }
     environment {
-        APP_NAME = "SpringToDo"
+        APP_NAME = "spring-to-do"
         RELEASE = "1.0.0"
         DOCKER_USER = "vkontakte001"
         IMAGE_NAME = "${DOCKER_USER}/${APP_NAME}"
