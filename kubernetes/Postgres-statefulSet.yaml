@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-stateful-set
+spec:
+  selector:
+    matchLabels:
+      name: postgres-pod
+      type: backend
+  serviceName: postgres
+  replicas: 1
+  template:
+    metadata:
+      name: postgres-pod
+      labels:
+        name: postgres-pod
+        type: backend
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:12-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: qwerty
+            - name: POSTGRES_DB
+              value: to_do_base
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 200Mi
