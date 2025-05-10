@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-deployment
+  labels:
+    name: spring-deployment
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-pod
+      type: backend
+  template:
+    metadata:
+      name: spring-pod
+      labels:
+        app: spring-pod
+        type: backend
+    spec:
+      containers:
+        - name: spring
+          image: vkontakte001/spring-to-do
+          ports:
+            - containerPort: 8080

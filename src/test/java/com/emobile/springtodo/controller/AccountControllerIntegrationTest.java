@@ -4,6 +4,7 @@ import com.emobile.springtodo.dto.request.AccountRequest;
 import com.emobile.springtodo.dto.response.AccountResponse;
 import com.emobile.springtodo.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
@@ -14,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -40,13 +40,15 @@ public class AccountControllerIntegrationTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+
     @Container
-    @ServiceConnection(name = "redis")
-    static GenericContainer<?> redisContainer
-            = new GenericContainer<>(DockerImageName.parse("redis:6.2-alpine")).withExposedPorts(6379);
+    @ServiceConnection
+    static RedisContainer redis = new RedisContainer(DockerImageName.parse("redis:6.2-alpine"))
+            .withExposedPorts(6379);
 
     @Test
     public void successCreatingAccountTest() throws Exception {
